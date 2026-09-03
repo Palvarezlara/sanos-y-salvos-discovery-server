@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: discovery-server
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:8888}
+
+server:
+  port: 8761
+
+# Configuración local de Eureka — evita el loop de auto-registro en el arranque
+# de Docker. Estas propiedades están aquí como fallback: si el config-server no
+# está disponible al arrancar, el servidor no intentará registrarse consigo mismo.
+eureka:
+  instance:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+  client:
+    register-with-eureka: false   # el servidor no se registra como cliente
+    fetch-registry: false         # el servidor no consulta el registro
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 5000
+    renewal-percent-threshold: 0.5
+    response-cache-update-interval-ms: 3000
