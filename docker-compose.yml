@@ -4,15 +4,17 @@ services:
     container_name: sanos-discovery-server
     restart: unless-stopped
     ports:
-      - "8761:8761"
+      # solo la maquina local: los demas servicios entran por la red de Docker
+      - "127.0.0.1:8761:8761"
     environment:
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
-    healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8761' || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+      # no opcional: sin Config Server el servicio no arranca (restart: unless-stopped lo reintenta)
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
+      EUREKA_HOSTNAME: discovery-server
+      # vacio = registro abierto (solo desarrollo local). Si se define, cada cliente debe llevar las mismas
+      # credenciales en EUREKA_CLIENT_SERVICEURL_DEFAULTZONE (http://usuario:clave@discovery-server:8761/eureka/)
+      EUREKA_AUTH_USER: ${EUREKA_AUTH_USER:-eureka}
+      EUREKA_AUTH_PASSWORD: ${EUREKA_AUTH_PASSWORD:-}
+    # el healthcheck (HTTP contra /actuator/health) viene definido en el Dockerfile
     networks:
       - sanos-y-salvos-network
 

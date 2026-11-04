@@ -6,4 +6,9 @@ spring:
   application:
     name: discovery-server
   config:
-    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:8888}
+    # Import obligatorio: si el Config Server no responde, el servicio falla al arrancar (y Docker lo reinicia)
+    # en vez de levantar con los valores por defecto de Spring (puerto 8080, sin registro) pareciendo sano.
+    import: ${SPRING_CONFIG_IMPORT:configserver:http://localhost:8888}
+  cloud:
+    config:
+      fail-fast: true
